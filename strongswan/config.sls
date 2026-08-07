@@ -72,11 +72,21 @@ strongswan-config-file-ipsec-conn-{{ connection }}:
     - user: root
     - group: {{ strongswan.group }}
     - mode: '0644'
+    - makedirs: True
     - context:
         connection: {{ connection }}
         data: {{ data|json }}
     - watch_in:
       - service: strongswan-service
+    - require_in:
+      - file: {{ strongswan.config.dropin_options }}
+      # This excludes the the connection files from the 'clean: True'.
+      # It does add the requirement for 'makedirs: True' on this state, because
+      # the dependency inversion, we risk attempting to create files when the
+      # directory doesn't exist.
+      # The alternative was splitting up 
+      # 'strongswan-config-directory-ipsec-dropin-connections:' into two 
+      # separate states.
 {% endfor %}
 
 # Global secrets
@@ -119,10 +129,14 @@ strongswan-config-file-ipsec-secret-{{ secret }}:
     - user: root
     - group: {{ strongswan.group }}
     - mode: '0600'
+    - makedirs: True
     - context:
         secret: {{ secret }}
         data: {{ data|json }}
     - watch_in:
       - service: strongswan-service
+    - require_in:
+      - file: {{ strongswan.config.dropin_secrets }}
+      # See above comment for config file 'require_in'
 {% endfor %}
 

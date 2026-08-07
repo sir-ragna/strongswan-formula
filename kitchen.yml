@@ -14,6 +14,10 @@ provisioner:
   salt_install: none
   require_chef: false
   formula: strongswan
+  pre_salt:
+    - mkdir -p /etc/ipsec.conf.d/
+    - touch /etc/ipsec.conf.d/DELETEME.conf
+    # The above will breaks the tests for BSD based system.
   salt_copy_filter:
     - .kitchen
     - .git
